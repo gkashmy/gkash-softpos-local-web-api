@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GkashSocketAPI", "GkashSocketAPI\GkashSocketAPI.csproj", "{55E7DB34-F2E6-4DA7-904A-5EB8AD8A4316}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{55E7DB34-F2E6-4DA7-904A-5EB8AD8A4316}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55E7DB34-F2E6-4DA7-904A-5EB8AD8A4316}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55E7DB34-F2E6-4DA7-904A-5EB8AD8A4316}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55E7DB34-F2E6-4DA7-904A-5EB8AD8A4316}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FD04BD1A-760E-4F59-ADCB-E07D9888C915}
+	EndGlobalSection
+EndGlobal
