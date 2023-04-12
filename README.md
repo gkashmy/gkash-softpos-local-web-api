@@ -49,7 +49,7 @@ You can configure the settings in the AppSettings file.
 
 ## Host with a Service/IIS
 
-- You may install this web API as a Windows service by using tools like [NSSM](https://nssm.cc/download).
+- You may host this web API with IIS or run it in Windows service by using tools like [NSSM](https://nssm.cc/download).
 
 ## Login API - Method POST
 
@@ -60,15 +60,13 @@ public class LoginDto
 {
     public string Username { get; set; }
     public string Password { get; set; }
-    public string CallbackURL { get; set; }
 }
 ```
 
 - `Username`: the login username of the Gkash SoftPOS APP.
 - `Password`: the password of the Gkash SoftPOS APP.
-- `CallbackURL`: the URL to which the response should be sent.
 
-The endpoint of this API: http://localhost:1234/api/Gkash/Login, you will receive status code 200 if the request is successful.
+The endpoint of this API: http://localhost:5010/api/Gkash/Login, you will receive status code 200 if the request is successful.
 
 ## Request Payment API - Method POST
 
@@ -83,6 +81,7 @@ public class PaymentRequestDto
     public string ReferenceNo { get; set; }
     public int PaymentType { get; set; }
     public bool PreAuth { get; set; }
+	public string CallbackURL { get; set; }
 }
 ```
 
@@ -92,6 +91,7 @@ public class PaymentRequestDto
 - `ReferenceNo`: a reference number for the payment request. (Optional)
 - `PaymentType`: the type of payment to be made. Please refer the table below
 - `PreAuth`: a boolean value indicating whether the payment should be a pre-authorization or not. (Optional)
+- `CallbackURL`: the URL to which the response should be sent.
 
 | Payment Type | Value |
 | --- | --- |
@@ -110,17 +110,17 @@ public class PaymentRequestDto
 | MCash QR | 12 |
 | DuitNow QR | 13 |
 
-The endpoint of this API: http://localhost:1234/api/Gkash/RequestPayment, you will receive status code 200 if the request is successful.
+The endpoint of this API: http://localhost:5010/api/Gkash/RequestPayment, you will receive status code 200 if the request is successful.
 
 ## Query Payment Status API - Method GET
 
 The query payment status API is used to check the status of a previous payment request. 
-Example: http://localhost:1234/api/Gkash/QueryStatus?ReferenceNo=WEBTCP-20290405131454, you will receive status code 200 if the request is successful.
+Example: http://localhost:5010/api/Gkash/QueryStatus?ReferenceNo=WEBTCP-20290405131454, you will receive status code 200 if the request is successful.
 
 - `ReferenceNo`: the reference number of the payment request.
 
-## Callback from SDK
-The SDK will send the transaction status to your CallbackURL after the payment is completed or query API is being called. The data transfer object used for this API is `TransactionStatus`.
+## Callback
+The web API will send the transaction status to your CallbackURL after the payment is completed or query API is being called. The data transfer object used for this API is `TransactionStatus`.
 
 ## TransactionStatus
 

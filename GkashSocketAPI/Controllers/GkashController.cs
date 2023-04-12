@@ -1,5 +1,4 @@
 ﻿using ClientSocketConnection;
-using ClientSocketConnection.model;
 using GkashSocketAPI.Core;
 using GkashSocketAPI.Dto.LoginDto;
 using GkashSocketAPI.Repository;
@@ -7,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog.Extensions.Logging;
 using Serilog;
 using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
 
 namespace GkashSocketAPI.Controllers
 {
@@ -83,7 +81,7 @@ namespace GkashSocketAPI.Controllers
         }
 
         [HttpPost(Name = "RequestPayment")]
-        public async Task<IActionResult> RequestPayment(PaymentRequestDto dto)
+        public async Task<IActionResult> RequestPayment(Dto.PaymentDto.PaymentRequestDto dto)
         {
             Microsoft.Extensions.Logging.ILogger logger = await _gkashRepository.GetLoggerAsync();
             try
@@ -122,7 +120,15 @@ namespace GkashSocketAPI.Controllers
                     dto.ReferenceNo = "WEBTCP-" + DateTime.Now.ToString("yyyyMMddHHmmss");
                 }
 
-                client.RequestPayment(dto);
+                ClientSocketConnection.model.PaymentRequestDto requestDto = new();
+                requestDto.PaymentType = dto.PaymentType; 
+                requestDto.Amount = dto.Amount;
+                requestDto.Email = dto.Email;
+                requestDto.ReferenceNo = dto.ReferenceNo;
+                requestDto.MobileNo = dto.MobileNo;
+                requestDto.PreAuth = dto.PreAuth;                
+
+                client.RequestPayment(requestDto);
 
                 return Ok(new { dto.ReferenceNo });
             }
