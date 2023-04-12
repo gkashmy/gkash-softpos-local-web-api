@@ -81,7 +81,7 @@ public class PaymentRequestDto
     public string ReferenceNo { get; set; }
     public int PaymentType { get; set; }
     public bool PreAuth { get; set; }
-	public string CallbackURL { get; set; }
+    public string CallbackURL { get; set; }
 }
 ```
 
