@@ -11,5 +11,6 @@ namespace GkashSocketAPI.Core
         void SendCallback(TransResult.TransactionStatus result);
         Task<ClientSocket> GetGkashSDKInstanceAsync();
         Task<ILogger> GetLoggerAsync();
+        Task SetCallbackURL(string callbackURL);
     }
 }

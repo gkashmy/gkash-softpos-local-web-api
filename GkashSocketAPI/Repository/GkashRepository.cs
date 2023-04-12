@@ -45,7 +45,6 @@ namespace GkashSocketAPI.Repository
             }
 
             ClientSocket socketConnection = new(dto.Username, dto.Password, this, certPath, isProdEnvironment, logger);
-            _callbackURL = dto.CallbackURL;
             await UpdateGkashSDKInstanceAsync(socketConnection);
             _logger.LogInformation("Login UpdateGkashSDKInstanceAsync: " + dto.Username);
         }
@@ -124,6 +123,11 @@ namespace GkashSocketAPI.Repository
         public async Task<ILogger> GetLoggerAsync()
         {
             return await Task.FromResult(_logger);
+        }
+
+        public async Task SetCallbackURL(string callbackURL)
+        {
+            await Task.FromResult(_callbackURL = callbackURL);
         }
     }
 }

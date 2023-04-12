@@ -28,7 +28,7 @@ namespace GkashSocketAPI.Controllers
             Microsoft.Extensions.Logging.ILogger logger = null;
             try
             {
-                if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password)  || string.IsNullOrWhiteSpace(dto.CallbackURL))
+                if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
                 {                    
                     return BadRequest("Invalid request, please check your request parameters");
                 }
@@ -88,6 +88,7 @@ namespace GkashSocketAPI.Controllers
             {
                 logger?.LogInformation("RequestPayment: " + JsonConvert.SerializeObject(dto));
                 ClientSocket client = await _gkashRepository.GetGkashSDKInstanceAsync();
+                await _gkashRepository.SetCallbackURL(dto.CallbackURL);
                 if (client == null)
                 {
                     logger?.LogError("RequestPayment BadRequest: Requesting payment before login");
@@ -126,7 +127,7 @@ namespace GkashSocketAPI.Controllers
                 requestDto.Email = dto.Email;
                 requestDto.ReferenceNo = dto.ReferenceNo;
                 requestDto.MobileNo = dto.MobileNo;
-                requestDto.PreAuth = dto.PreAuth;                
+                requestDto.PreAuth = dto.PreAuth;                          
 
                 client.RequestPayment(requestDto);
 
