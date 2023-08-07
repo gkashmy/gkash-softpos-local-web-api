@@ -1,4 +1,4 @@
-# Gkash SoftPOS local web API
+# Gkash SoftPOS local web API (Offline payment)
 This project is a local web API that allows merchants to call and make payments. The application has three main functionalities: login, request payment, and query payment status.
 
 ## Quick Start
