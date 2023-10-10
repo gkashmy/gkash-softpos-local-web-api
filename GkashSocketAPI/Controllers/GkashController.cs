@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Serilog.Extensions.Logging;
 using Serilog;
 using Newtonsoft.Json;
+using ClientSocketConnection.model;
 
 namespace GkashSocketAPI.Controllers
 {
@@ -154,9 +155,14 @@ namespace GkashSocketAPI.Controllers
 
                 ClientSocket client = await _gkashRepository.GetGkashSDKInstanceAsync();
                 logger?.LogInformation("QueryStatus: " + ReferenceNo);
-                client.QueryStatus(ReferenceNo);
+                TransResult.TransactionStatus status =  client.QueryStatus(ReferenceNo);
 
-                return Ok();
+                if(status == null)
+                {
+                    return BadRequest();
+                }
+
+                return Ok(status);
             }
             catch(Exception ex)
             {
