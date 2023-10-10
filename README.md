@@ -115,7 +115,7 @@ The endpoint of this API: http://localhost:5010/api/Gkash/RequestPayment, you wi
 ## Query Payment Status API - Method GET
 
 The query payment status API is used to check the status of a previous payment request. 
-Example: http://localhost:5010/api/Gkash/QueryStatus?ReferenceNo=WEBTCP-20290405131454, you will receive status code 200 if the request is successful.
+Example: http://localhost:5010/api/Gkash/QueryStatus?ReferenceNo=WEBTCP-20290405131454, you will receive status code 200 and `TransactionStatus` if the request is successful.
 
 - `ReferenceNo`: the reference number of the payment request.
 
