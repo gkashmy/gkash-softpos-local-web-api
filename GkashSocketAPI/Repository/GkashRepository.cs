@@ -58,7 +58,7 @@ namespace GkashSocketAPI.Repository
         public void QueryTransactionResult(TransResult.TransactionStatus result)
         {
             _logger.LogInformation(result.Status);
-            SendCallback(result);
+          //  SendCallback(result);
         }
 
         public void TransactionEventCallback(SocketStatus.TransactionEventCallback transactionEventCallback)
