@@ -93,6 +93,8 @@ public class PaymentRequestDto
 - `PreAuth`: a boolean value indicating whether the payment should be a pre-authorization or not. (Optional)
 - `CallbackURL`: the URL to which the response should be sent.
 
+Note: If you are using DuitNow QR, we will append "-QR" to your reference number and generate the DuitNow QR.
+
 | Payment Type | Value |
 | --- | --- |
 | eWallet Scan | 0 |
@@ -114,11 +116,96 @@ The endpoint of this API: http://localhost:5010/api/Gkash/RequestPayment, you wi
 
 ## Query Payment Status API - Method GET
 
-The query payment status API is used to check the status of a previous payment request.\
-Example: http://localhost:5010/api/Gkash/QueryStatus?ReferenceNo=WEBTCP-20290405131454, you will receive status code 200 and `TransactionStatus` if the request is successful.\
-Example: http://localhost:5010/api/Gkash/QueryCardAndDuitNowStatus?ReferenceNo=WEBTCP-20290405131454, you will receive status code 200 and `List<TransactionStatus>` if the request is successful.
+The query payment status API is used to check the status of a previous payment request.
+
+Example: http://localhost:5010/api/Gkash/QueryStatus?ReferenceNo=12345678912345, you will receive status code 200 and `TransactionStatus` if the request is successful.
+
+If you are using DuitNow QR also, you can call this API to obtain both transaction status.
+Example: http://localhost:5010/api/Gkash/QueryCardAndDuitNowStatus?ReferenceNo=12345678912345, you will receive status code 200 and `List<TransactionStatus>` if the request is successful.
 
 - `ReferenceNo`: the reference number of the payment request.
+
+```
+//Example response of QueryStatus API
+{
+    "applicationId": "A0000000031010",
+    "authIDResponse": "      ",
+    "responseOrderNumber": "333219000014",
+    "cardNo": "VISA 4761 73** **** 0119",
+    "cardType": "VISA CREDIT",
+    "cartID": "12345678912345",
+    "companyRemID": "M161-C-58175",
+    "mid": "***********5284",
+    "message": "00 - Approved",
+    "method": "GMY.UMTECHMPOSMYR",
+    "remID": "M161-PO-187445",
+    "settlementBatchNumber": "000012",
+    "signatureRequired": "0",
+    "status": "88 - Transferred",
+    "tid": "****3096",
+    "tvr": "0000000000",
+    "traceNo": "000014",
+    "transferAmount": "3.00",
+    "transferCurrency": "MYR",
+    "transferDate": "2023-11-28 19:30:34",
+    "txType": "SALE",
+    "signature": null
+}
+
+
+//Example response of QueryCardAndDuitNowStatus API
+[
+    {
+        "applicationId": "A0000000031010",
+        "authIDResponse": "      ",
+        "responseOrderNumber": "333219000014",
+        "cardNo": "VISA 4761 73** **** 0119",
+        "cardType": "VISA CREDIT",
+        "cartID": "12345678912345",
+        "companyRemID": "M161-C-58175",
+        "mid": "***********5284",
+        "message": "00 - Approved",
+        "method": "GMY.UMTECHMPOSMYR",
+        "remID": "M161-PO-187445",
+        "settlementBatchNumber": "000012",
+        "signatureRequired": "0",
+        "status": "88 - Transferred",
+        "tid": "****3096",
+        "tvr": "0000000000",
+        "traceNo": "000014",
+        "transferAmount": "3.00",
+        "transferCurrency": "MYR",
+        "transferDate": "2023-11-28 19:30:34",
+        "txType": "SALE",
+        "signature": null
+    },
+    {
+        "applicationId": null,
+        "authIDResponse": null,
+        "responseOrderNumber": null,
+        "cardNo": "xxxx",
+        "cardType": null,
+        "cartID": "12345678912345-QR",
+        "companyRemID": "M161-C-58320",
+        "mid": "asd",
+        "message": null,
+        "method": "GMY.DNQRMYR",
+        "remID": "M161-PO-187444",
+        "settlementBatchNumber": null,
+        "signatureRequired": null,
+        "status": "66 - Failed",
+        "tid": "asd",
+        "tvr": null,
+        "traceNo": null,
+        "transferAmount": "3.00",
+        "transferCurrency": "MYR",
+        "transferDate": "2023-11-28 19:30:22",
+        "txType": "SALE",
+        "signature": null
+    }
+]
+```
+
 
 ## Callback
 The web API will send the transaction status to your CallbackURL after the payment is completed or query API is being called. The data transfer object used for this API is `TransactionStatus`.
