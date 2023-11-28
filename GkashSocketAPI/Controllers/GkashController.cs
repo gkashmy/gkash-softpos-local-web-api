@@ -171,5 +171,35 @@ namespace GkashSocketAPI.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured."); // Status Code: 500
             }
         }
+
+        [HttpGet(Name = "QueryCardAndDuitNowStatus")]
+        public async Task<IActionResult> QueryCardAndDuitNowStatus(string ReferenceNo)
+        {
+            Microsoft.Extensions.Logging.ILogger logger = await _gkashRepository.GetLoggerAsync();
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ReferenceNo))
+                {
+                    return BadRequest("Invalid ReferenceNo");
+                }
+
+                ClientSocket client = await _gkashRepository.GetGkashSDKInstanceAsync();
+                logger?.LogInformation("QueryCardAndDuitNowStatus: " + ReferenceNo);
+                List<TransResult.TransactionStatus> status = client.QueryCardAndDuitNowStatus(ReferenceNo);
+
+                if (status == null)
+                {
+                    return BadRequest();
+                }
+
+                return Ok(status);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogError("QueryCardAndDuitNowStatus Exception: " + ex);
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured."); // Status Code: 500
+            }
+        }
     }
 }
