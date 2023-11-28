@@ -121,6 +121,7 @@ The query payment status API is used to check the status of a previous payment r
 Example: http://localhost:5010/api/Gkash/QueryStatus?ReferenceNo=12345678912345, you will receive status code 200 and `TransactionStatus` if the request is successful.
 
 If you are using DuitNow QR also, you can call this API to obtain both transaction status.
+
 Example: http://localhost:5010/api/Gkash/QueryCardAndDuitNowStatus?ReferenceNo=12345678912345, you will receive status code 200 and `List<TransactionStatus>` if the request is successful.
 
 - `ReferenceNo`: the reference number of the payment request.
