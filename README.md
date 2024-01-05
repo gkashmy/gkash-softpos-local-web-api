@@ -32,13 +32,16 @@ You can configure the settings in the AppSettings file.
       "Microsoft.AspNetCore": "Warning"
     }
   },
-  "Urls": "http://localhost:5010",
-  "CertPath": "C://t1clientcert/t1clientcert.pfx",
-  "TestingEnv": true,
-  "EnabledLogging": true,
-  "LoggingPath": "C://GkashSocketAPILog/log.txt",
-  "AllowedHosts": "*"
+  "Settings": {
+    "Urls": "http://localhost:5010",
+    "CertPath": "C://t1clientcert/t1clientcert.pfx",
+    "TestingEnv": false,
+    "EnabledLogging": true,
+    "LoggingPath": "C://GkashSocketAPILog/log.txt",
+    "AllowedHosts": "*"
+  }
 }
+
 ```
 - `Urls`: the hosting url used for this web API.
 - `CertPath`: the path of pfx file used for authentication.
@@ -68,6 +71,12 @@ public class LoginDto
 
 The endpoint of this API: http://localhost:5010/api/Gkash/Login, you will receive status code 200 if the request is successful.
 
+```json
+{
+    "message": "Login Successful"
+}
+```
+
 ## Request Payment API - Method POST
 
 The request payment API is used to initiate a payment request. The content type of this API is application/json, the data transfer object used for this API is `PaymentRequestDto` and has the following properties:
@@ -76,6 +85,7 @@ The request payment API is used to initiate a payment request. The content type 
 public class PaymentRequestDto
 {
     public decimal Amount { get; set; }
+	public string TerminalId { get; set; }
     public string Email { get; set; }
     public string MobileNo { get; set; }
     public string ReferenceNo { get; set; }
@@ -86,6 +96,7 @@ public class PaymentRequestDto
 ```
 
 - `Amount`: the amount to be paid.
+- `TerminalId`: the terminal id that login to the SoftPOS by Gkash APP.
 - `Email`: the email of the customer making the payment. (Optional)
 - `MobileNo`: the mobile number of the customer making the payment. (Optional)
 - `ReferenceNo`: a reference number for the payment request. (Optional)

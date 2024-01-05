@@ -1,12 +1,9 @@
 ﻿using ClientSocketConnection;
 using GkashSocketAPI.Core;
 using GkashSocketAPI.Dto.LoginDto;
-using GkashSocketAPI.Repository;
 using Microsoft.AspNetCore.Mvc;
-using Serilog.Extensions.Logging;
-using Serilog;
-using Newtonsoft.Json;
 using ClientSocketConnection.model;
+using System.Text.Json;
 
 namespace GkashSocketAPI.Controllers
 {
@@ -14,87 +11,49 @@ namespace GkashSocketAPI.Controllers
     [ApiController]
     public class GkashController : ControllerBase
     {
-        private readonly IGkashRepository _gkashRepository;
-        private readonly IConfiguration _configuration;
+        private readonly IGkashService _gkashService;
+        private readonly ILogger _logger;
+        private readonly string HANDLER = nameof(GkashController);
 
-        public GkashController(IGkashRepository gkashRepository, IConfiguration configuration)
+        public GkashController(IGkashService gkashService, ILogger<GkashController> logger)
         {
-            _gkashRepository = gkashRepository;
-            _configuration = configuration;
+            _gkashService = gkashService;
+            _logger = logger;
         }
 
         [HttpPost(Name = "Login")]
         public async Task<IActionResult> Login(LoginDto dto)
         {
-            Microsoft.Extensions.Logging.ILogger logger = null;
+            string tag = $"{HANDLER}.{nameof(Login)}";
             try
             {
+                _logger?.LogInformation($"{tag} request: {dto.Username}");
+
                 if (string.IsNullOrWhiteSpace(dto.Username) || string.IsNullOrWhiteSpace(dto.Password))
-                {                    
+                {
+                    _logger?.LogError($"{tag} Username or Password is empty");
                     return BadRequest("Invalid request, please check your request parameters");
                 }
 
-                bool enabledLogging = _configuration.GetValue<bool>("EnabledLogging");
-                string loggingPath = _configuration.GetValue<string>("LoggingPath");
-
-                if (enabledLogging)
-                {
-                    if (string.IsNullOrWhiteSpace(loggingPath))
-                    {
-                        loggingPath = "C:\\GkashSocketAPILog\\log.txt";
-                    }
-
-                    //use serilog
-                    var serilogLogger = new LoggerConfiguration()
-                     .MinimumLevel.Debug()
-                     .WriteTo.File(loggingPath, shared: true, rollingInterval: RollingInterval.Month)
-                     .CreateLogger();
-                    logger = new SerilogLoggerFactory(serilogLogger).CreateLogger<GkashRepository>();
-                }
-
-                await _gkashRepository.LoginAsync(dto, logger);
-
-                ClientSocket client = await _gkashRepository.GetGkashSDKInstanceAsync();
-
-                if(string.IsNullOrWhiteSpace(client.GetIpAddress()))
-                {
-                    if (enabledLogging)
-                    {
-                        logger?.LogError("Login failed, please check log");
-                        return BadRequest("Login failed, please check log");
-                    }
-                    else
-                    {
-                        logger?.LogError("Login failed, please enable logging and check log");
-                        return BadRequest("Login failed, please enable logging and check log");
-                    }                 
-                }                
-
-                return Ok();
+                string status = await _gkashService.LoginAsync(dto);
+                _logger?.LogInformation($"{tag} response: {status}");
+                return Ok(new {Message = status});
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.ToString());
-                logger?.LogError("Login Exception: " + ex);
+                _logger?.LogError($"{tag} Exception: {ex}");
 
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured."); // Status Code: 500
             }       
         }
 
         [HttpPost(Name = "RequestPayment")]
-        public async Task<IActionResult> RequestPayment(Dto.PaymentDto.PaymentRequestDto dto)
+        public IActionResult RequestPayment(PaymentRequestDto dto)
         {
-            Microsoft.Extensions.Logging.ILogger logger = await _gkashRepository.GetLoggerAsync();
+            string tag = $"{HANDLER}.{nameof(RequestPayment)}";
             try
-            {
-                logger?.LogInformation("RequestPayment: " + JsonConvert.SerializeObject(dto));
-                ClientSocket client = await _gkashRepository.GetGkashSDKInstanceAsync();
-                await _gkashRepository.SetCallbackURL(dto.CallbackURL);
-                if (client == null)
-                {
-                    logger?.LogError("RequestPayment BadRequest: Requesting payment before login");
-                    return BadRequest("Please login first before request payment.");
-                }
+            {                            
+                _logger?.LogInformation($"{tag}: {JsonSerializer.Serialize(dto)}");
 
                 if (((int)dto.PaymentType) > 13 || ((int)dto.PaymentType) < 0)
                 {
@@ -103,7 +62,7 @@ namespace GkashSocketAPI.Controllers
 
                 if (string.IsNullOrWhiteSpace(dto.Amount))
                 {
-                    logger?.LogError("RequestPayment BadRequest: Amount is empty");
+                    _logger?.LogError($"{tag} RequestPayment BadRequest: Amount is empty");
                     return BadRequest("Invalid Amount.");
                 }
 
@@ -113,7 +72,7 @@ namespace GkashSocketAPI.Controllers
                 }
                 catch (Exception ex)
                 {
-                    logger?.LogError("RequestPayment BadRequest: " + ex);
+                    _logger?.LogError($"{tag} BadRequest: {ex}");
                     return BadRequest("Invalid Amount.");
                 }
                 
@@ -122,21 +81,13 @@ namespace GkashSocketAPI.Controllers
                     dto.ReferenceNo = "WEBTCP-" + DateTime.Now.ToString("yyyyMMddHHmmss");
                 }
 
-                ClientSocketConnection.model.PaymentRequestDto requestDto = new();
-                requestDto.PaymentType = dto.PaymentType; 
-                requestDto.Amount = dto.Amount;
-                requestDto.Email = dto.Email;
-                requestDto.ReferenceNo = dto.ReferenceNo;
-                requestDto.MobileNo = dto.MobileNo;
-                requestDto.PreAuth = dto.PreAuth;                          
-
-                client.RequestPayment(requestDto);
+                _gkashService.RequestPayment(dto);
 
                 return Ok(new { dto.ReferenceNo });
             }
             catch(Exception ex)
             {
-                logger?.LogError("RequestPayment Exception: " + ex);
+                _logger?.LogError($"{tag} Exception: {ex}");
 
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured."); // Status Code: 500
             }          
@@ -145,47 +96,17 @@ namespace GkashSocketAPI.Controllers
         [HttpGet(Name = "QueryStatus")]
         public async Task<IActionResult> QueryStatus(string ReferenceNo)
         {
-            Microsoft.Extensions.Logging.ILogger logger = await _gkashRepository.GetLoggerAsync();
+            string tag = $"{HANDLER}.{nameof(QueryStatus)}";
             try
             {
                 if (string.IsNullOrWhiteSpace(ReferenceNo))
                 {
+                    _logger?.LogInformation($"{tag} ReferenceNo is empty");
                     return BadRequest("Invalid ReferenceNo");
                 }
 
-                ClientSocket client = await _gkashRepository.GetGkashSDKInstanceAsync();
-                logger?.LogInformation("QueryStatus: " + ReferenceNo);
-                TransResult.TransactionStatus status =  client.QueryStatus(ReferenceNo);
-
-                if(status == null)
-                {
-                    return BadRequest();
-                }
-
-                return Ok(status);
-            }
-            catch(Exception ex)
-            {
-                logger?.LogError("QueryStatus Exception: " + ex);
-
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured."); // Status Code: 500
-            }
-        }
-
-        [HttpGet(Name = "QueryCardAndDuitNowStatus")]
-        public async Task<IActionResult> QueryCardAndDuitNowStatus(string ReferenceNo)
-        {
-            Microsoft.Extensions.Logging.ILogger logger = await _gkashRepository.GetLoggerAsync();
-            try
-            {
-                if (string.IsNullOrWhiteSpace(ReferenceNo))
-                {
-                    return BadRequest("Invalid ReferenceNo");
-                }
-
-                ClientSocket client = await _gkashRepository.GetGkashSDKInstanceAsync();
-                logger?.LogInformation("QueryCardAndDuitNowStatus: " + ReferenceNo);
-                List<TransResult.TransactionStatus> status = client.QueryCardAndDuitNowStatus(ReferenceNo);
+                _logger?.LogInformation($"{tag} : " + ReferenceNo);
+                TransResult.TransactionStatus status = await _gkashService.QueryTransactionStatusAsync(ReferenceNo);
 
                 if (status == null)
                 {
@@ -196,7 +117,60 @@ namespace GkashSocketAPI.Controllers
             }
             catch (Exception ex)
             {
-                logger?.LogError("QueryCardAndDuitNowStatus Exception: " + ex);
+                _logger?.LogError($"{tag} Exception: {ex}");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured."); // Status Code: 500
+            }
+        }
+
+        [HttpGet(Name = "QueryCardAndDuitNowStatus")]
+        public async Task<IActionResult> QueryCardAndDuitNowStatus(string ReferenceNo)
+        {
+            string tag = $"{HANDLER}.{nameof(QueryCardAndDuitNowStatus)}";
+            try
+            {
+                if (string.IsNullOrWhiteSpace(ReferenceNo))
+                {
+                    _logger?.LogInformation($"{tag} ReferenceNo is empty");
+                    return BadRequest("Invalid ReferenceNo");
+                }
+                _logger?.LogInformation($"{tag} : " + ReferenceNo);
+                List<TransResult.TransactionStatus> status = await _gkashService.QueryCardAndDuitNowStatusAsync(ReferenceNo);              
+
+                if (status == null)
+                {
+                    return BadRequest();
+                }
+
+                return Ok(status);
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError($"{tag} Exception: {ex}");
+
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occured."); // Status Code: 500
+            }
+        }
+
+        [HttpGet(Name = "CancelTransaction")]
+        public IActionResult CancelTransaction(string TerminalId)
+        {
+            string tag = $"{HANDLER}.{nameof(CancelTransaction)}";
+            try
+            {
+                if (string.IsNullOrWhiteSpace(TerminalId))
+                {
+                    return BadRequest($"{tag} Invalid TerminalId");
+                }
+
+                _gkashService.CancelTransaction(TerminalId);
+                _logger?.LogInformation($"{tag} CancelTransaction: {TerminalId}");
+
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError($"{tag} Exception: {ex}");
 
                 return StatusCode(StatusCodes.Status500InternalServerError, "An error occured."); // Status Code: 500
             }
