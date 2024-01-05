@@ -85,7 +85,7 @@ The request payment API is used to initiate a payment request. The content type 
 public class PaymentRequestDto
 {
     public decimal Amount { get; set; }
-	public string TerminalId { get; set; }
+    public string TerminalId { get; set; }
     public string Email { get; set; }
     public string MobileNo { get; set; }
     public string ReferenceNo { get; set; }
