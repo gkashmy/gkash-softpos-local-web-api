@@ -85,7 +85,7 @@ The request payment API is used to initiate a payment request. The content type 
 public class PaymentRequestDto
 {
     public decimal Amount { get; set; }
-	public string TerminalId { get; set; }
+    public string TerminalId { get; set; }
     public string Email { get; set; }
     public string MobileNo { get; set; }
     public string ReferenceNo { get; set; }
@@ -124,6 +124,15 @@ Note: If you are using DuitNow QR, we will append "-QR" to your reference number
 | DuitNow QR | 13 |
 
 The endpoint of this API: http://localhost:5010/api/Gkash/RequestPayment, you will receive status code 200 if the request is successful.
+
+## Cancel Transaction API - Method GET
+
+The Cancel Transaction API is used to cancel current on-going transaction.
+Note: This API cannot cancel the transaction that is already sent to host.
+
+Example: http://localhost:5010/api/Gkash/CancelTransaction?TerminalId=M102-TD-9999, you will receive status code 200 if the request is successful.
+
+- `TerminalId`: the Terminal Id that login to the SoftPOS by Gkash APP.
 
 ## Query Payment Status API - Method GET
 
