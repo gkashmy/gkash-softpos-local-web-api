@@ -51,7 +51,7 @@ namespace GkashSocketAPI.Service.Impl
             if (clientSocket == null)
             {
                 _logger?.LogInformation($"{tag} LoginAsync create new clientSocket instance: " + dto.Username);
-                clientSocket = new(this, _settingsDto.CertPath, !_settingsDto.TestingEnv, _logger);
+                clientSocket = new(this, _settingsDto.CertPath, !_settingsDto.TestingEnv, _logger, _client);
 
                 _defaultTerminalId ??= dto.Username;
 
