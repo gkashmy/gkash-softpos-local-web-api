@@ -13,5 +13,7 @@ namespace GkashSocketAPI.Core
         void RequestPayment(PaymentRequestDto dto);
         Task<TransResult.TransactionStatus> QueryTransactionStatusAsync(string referenceId);
         Task<List<TransResult.TransactionStatus>> QueryCardAndDuitNowStatusAsync(string referenceId);
+        bool CancelRemoteTransaction(string terminalId);
+        bool RequestRemotePayment(PaymentRequestDto dto);
     }
 }

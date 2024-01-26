@@ -81,9 +81,16 @@ namespace GkashSocketAPI.Controllers
                     dto.ReferenceNo = "WEBTCP-" + DateTime.Now.ToString("yyyyMMddHHmmss");
                 }
 
-                _gkashService.RequestPayment(dto);
+                bool isRequestSuccess = _gkashService.RequestRemotePayment(dto);
 
-                return Ok(new { dto.ReferenceNo });
+                _logger?.LogInformation($"{tag} RequestPayment: {dto.TerminalId}, Request status: {isRequestSuccess}");
+
+                if (isRequestSuccess)
+                {
+                    return Ok(new { dto.ReferenceNo });
+                }
+
+                return BadRequest("Request failed");
             }
             catch(Exception ex)
             {
@@ -163,10 +170,15 @@ namespace GkashSocketAPI.Controllers
                     return BadRequest($"{tag} Invalid TerminalId");
                 }
 
-                _gkashService.CancelTransaction(TerminalId);
-                _logger?.LogInformation($"{tag} CancelTransaction: {TerminalId}");
+                bool isRequestSuccess = _gkashService.CancelRemoteTransaction(TerminalId);
 
-                return Ok();
+                _logger?.LogInformation($"{tag} CancelTransaction: {TerminalId}, Request status: {isRequestSuccess}");
+
+                if (isRequestSuccess)
+                {
+                    return Ok();
+                }
+                return BadRequest("Request failed");
             }
             catch (Exception ex)
             {

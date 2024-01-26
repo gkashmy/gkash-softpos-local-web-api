@@ -159,5 +159,19 @@ namespace GkashSocketAPI.Service.Impl
         {
             _callbackURL = callbackURL;
         }
+
+        public bool RequestRemotePayment(PaymentRequestDto dto)
+        {
+            ClientSocket clientSocket = GetGkashSDKInstance(dto.TerminalId) ?? throw new Exception(dto.TerminalId + " ClientSocket instance not found, forgot to login?");
+            SetCallbackURL(dto.CallbackURL);
+            return clientSocket.RequestRemotePayment(dto);
+        }
+
+        public bool CancelRemoteTransaction(string terminalId)
+        {
+            ClientSocket clientSocket = GetGkashSDKInstance(terminalId) ?? throw new Exception(terminalId + " ClientSocket instance not found, forgot to login?");
+
+            return clientSocket.CancelRemotePayment(terminalId);
+        }
     }
 }
